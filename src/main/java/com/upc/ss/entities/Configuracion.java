@@ -1,5 +1,6 @@
 package com.upc.ss.entities;
 
+import com.upc.ss.security.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,10 +11,10 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 @Table(name = "configuracion")
 public class Configuracion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_configuracion")
@@ -21,7 +22,7 @@ public class Configuracion {
 
     @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
-    private Usuario usuario;
+    private User user;
 
     @Column(name = "idioma", nullable = false)
     private String idioma;

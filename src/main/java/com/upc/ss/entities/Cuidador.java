@@ -1,4 +1,6 @@
 package com.upc.ss.entities;
+
+import com.upc.ss.security.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,19 +11,25 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 @Table(name = "cuidador")
 public class Cuidador {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cuidador")
     private Long idCuidador;
-    private String telefono;
-    private String especialidad;
-    private String biografia;
-    private Boolean notificacionEncendida = true;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "id_cuidador")
-    private Usuario usuario;
+    private User user;
+
+    @Column(name = "telefono")
+    private String telefono;
+
+    @Column(name = "biografia", columnDefinition = "TEXT")
+    private String biografia;
+
+    @Column(name = "notificacion_encendida")
+    private Boolean notificacionEncendida = true;
 }
