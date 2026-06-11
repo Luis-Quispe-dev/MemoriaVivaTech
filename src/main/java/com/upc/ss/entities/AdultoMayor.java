@@ -1,4 +1,6 @@
 package com.upc.ss.entities;
+
+import com.upc.ss.security.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,17 +13,19 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
 @Table(name = "adulto_mayor")
 public class AdultoMayor {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_adulto_mayor")
     private Long idAdultoMayor;
-    private LocalDate fechaNacimiento;
-    private String direccion;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "id_adulto_mayor")
-    private Usuario usuario;
+    private User user;
+
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
 }
