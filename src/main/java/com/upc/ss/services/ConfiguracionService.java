@@ -3,7 +3,6 @@ package com.upc.ss.services;
 import com.upc.ss.dtos.ConfiguracionLlamadoDTO;
 import com.upc.ss.dtos.ConfiguracionRespondeDTO;
 import com.upc.ss.entities.Configuracion;
-import com.upc.ss.entities.Usuario;
 import com.upc.ss.repositories.ConfiguracionRepository;
 import com.upc.ss.repositories.UsuarioRepository;
 import org.modelmapper.ModelMapper;

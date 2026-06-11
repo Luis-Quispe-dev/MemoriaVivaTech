@@ -6,7 +6,6 @@ import com.upc.ss.dtos.CuidadorLlamarDTO;
 import com.upc.ss.dtos.CuidadorRespuestaDTO;
 import com.upc.ss.entities.AdultoMayor;
 import com.upc.ss.entities.Cuidador;
-import com.upc.ss.entities.Usuario;
 import com.upc.ss.repositories.AdultoMayorRepository;
 import com.upc.ss.repositories.CuidadorRepository;
 import com.upc.ss.repositories.UsuarioRepository;

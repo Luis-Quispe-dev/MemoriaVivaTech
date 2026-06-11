@@ -1,6 +1,5 @@
 package com.upc.ss.repositories;
 
-import com.upc.ss.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

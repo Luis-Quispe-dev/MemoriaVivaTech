@@ -4,7 +4,6 @@ import com.upc.ss.dtos.CambiarContrasenaDTO;
 import com.upc.ss.dtos.LoginLlamadoDTO;
 import com.upc.ss.dtos.LoginRespondeDTO;
 import com.upc.ss.dtos.RecuperarContresenaDTO;
-import com.upc.ss.entities.Usuario;
 import com.upc.ss.repositories.AdultoMayorRepository;
 import com.upc.ss.repositories.CuidadorRepository;
 import com.upc.ss.repositories.UsuarioRepository;
