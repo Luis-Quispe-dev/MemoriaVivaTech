@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface CuidadorRepository extends JpaRepository<Cuidador, Long> {
-    Optional<Cuidador> findByUsuarioIdUsuario(Long idUsuario);
+    Optional<Cuidador> findByUserEmail(String email);
 }

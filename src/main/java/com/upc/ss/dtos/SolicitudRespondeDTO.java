@@ -22,4 +22,5 @@ public class SolicitudRespondeDTO {
     private String estado;
     private LocalDateTime fechaCreacion;
     private String mensaje;
+    private String fotoCuidador;
 }

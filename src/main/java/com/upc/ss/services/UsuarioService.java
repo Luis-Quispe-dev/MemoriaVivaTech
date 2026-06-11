@@ -1,16 +1,15 @@
 package com.upc.ss.services;
 
-import com.upc.ss.dtos.AdultoMayorLlamarDTO;
-import com.upc.ss.dtos.AdultoMayorRespuestaDTO;
-import com.upc.ss.dtos.CuidadorLlamarDTO;
-import com.upc.ss.dtos.CuidadorRespuestaDTO;
-import com.upc.ss.entities.AdultoMayor;
-import com.upc.ss.entities.Cuidador;
-import com.upc.ss.repositories.AdultoMayorRepository;
-import com.upc.ss.repositories.CuidadorRepository;
-import com.upc.ss.repositories.UsuarioRepository;
+import com.upc.ss.dtos.*;
+import com.upc.ss.entities.*;
+import com.upc.ss.repositories.*;
+import com.upc.ss.security.entities.Role;
+import com.upc.ss.security.entities.User;
+import com.upc.ss.security.repositories.RoleRepository;
+import com.upc.ss.security.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +19,12 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class UsuarioService {
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private AdultoMayorRepository adultoMayorRepository;
@@ -36,160 +39,179 @@ public class UsuarioService {
     private SuscripcionService suscripcionService;
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public AdultoMayorRespuestaDTO registrarAdultoMayor(AdultoMayorLlamarDTO dto) {
 
-        Usuario usuario = new Usuario();
-        usuario.setNombreCompleto(dto.getNombreCompleto());
-        usuario.setEmail(dto.getEmail());
-        usuario.setContrasena(dto.getContrasena());
-        usuario.setRol(Usuario.Rol.ADULTO_MAYOR);
+        if (dto.getContrasena() == null || dto.getContrasena().trim().isEmpty()) {
+            throw new RuntimeException("La contraseña es obligatoria para el registro");
+        }
 
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        if (dto.getFechaNacimiento() == null) {
+            throw new RuntimeException("La fecha de nacimiento es obligatoria para el registro");
+        }
+
+        if (userRepository.existsByEmail(dto.getEmail()))
+            throw new RuntimeException("El email ya está registrado");
+
+        Role rol = roleRepository.findByName("ROLE_ADULTO_MAYOR")
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        User user = new User();
+        user.setUsername(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getContrasena()));
+        user.setEmail(dto.getEmail());
+        user.setNombreCompleto(dto.getNombreCompleto());
+        user.getRoles().add(rol);
+        User userGuardado = userRepository.save(user);
+
         AdultoMayor adultoMayor = new AdultoMayor();
-        adultoMayor.setUsuario(usuarioGuardado);
+        adultoMayor.setUser(userGuardado);
         adultoMayor.setFechaNacimiento(dto.getFechaNacimiento());
-        adultoMayor.setDireccion(dto.getDireccion());
-
         AdultoMayor guardado = adultoMayorRepository.save(adultoMayor);
-        AdultoMayorRespuestaDTO response = modelMapper.map(guardado, AdultoMayorRespuestaDTO.class);
-        response.setNombreCompleto(usuarioGuardado.getNombreCompleto());
-        response.setEmail(usuarioGuardado.getEmail());
 
-        configuracionService.crearConfiguracionInicial(usuarioGuardado.getIdUsuario());
-
+        configuracionService.crearConfiguracionInicial(userGuardado.getId());
         suscripcionService.crearSuscripcionGratis(guardado.getIdAdultoMayor());
 
-        return response;
+        return armarResponseAdulto(guardado);
     }
 
     public CuidadorRespuestaDTO registrarCuidador(CuidadorLlamarDTO dto) {
 
-        Usuario usuario = new Usuario();
-        usuario.setNombreCompleto(dto.getNombreCompleto());
-        usuario.setEmail(dto.getEmail());
-        usuario.setContrasena(dto.getContrasena());
-        usuario.setRol(Usuario.Rol.CUIDADOR);
+        if (dto.getContrasena() == null || dto.getContrasena().trim().isEmpty()) {
+            throw new RuntimeException("La contraseña es obligatoria para el registro");
+        }
 
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        if (userRepository.existsByEmail(dto.getEmail()))
+            throw new RuntimeException("El email ya está registrado");
+
+        Role rol = roleRepository.findByName("ROLE_CUIDADOR")
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        User user = new User();
+        user.setUsername(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getContrasena()));
+        user.setEmail(dto.getEmail());
+        user.setNombreCompleto(dto.getNombreCompleto());
+        user.getRoles().add(rol);
+        User userGuardado = userRepository.save(user);
 
         Cuidador cuidador = new Cuidador();
-        cuidador.setUsuario(usuarioGuardado);
-        cuidador.setEspecialidad(dto.getEspecialidad());
+        cuidador.setUser(userGuardado);
         cuidador.setTelefono(dto.getTelefono());
         cuidador.setBiografia(dto.getBiografia());
         cuidador.setNotificacionEncendida(true);
-
         Cuidador guardado = cuidadorRepository.save(cuidador);
-        CuidadorRespuestaDTO response = modelMapper.map(guardado, CuidadorRespuestaDTO.class);
-        response.setNombreCompleto(usuarioGuardado.getNombreCompleto());
-        response.setEmail(usuarioGuardado.getEmail());
 
-        configuracionService.crearConfiguracionInicial(usuarioGuardado.getIdUsuario());
+        configuracionService.crearConfiguracionInicial(userGuardado.getId());
 
-
-        return response;
+        return armarResponseCuidador(guardado);
     }
+
 
     public List<AdultoMayorRespuestaDTO> listarAdultosMayores() {
-
         return adultoMayorRepository.findAll()
-                .stream()
-                .map(adultoMayor -> {
-                    AdultoMayorRespuestaDTO dto =
-                            modelMapper.map(adultoMayor, AdultoMayorRespuestaDTO.class);
-                    dto.setNombreCompleto(adultoMayor.getUsuario().getNombreCompleto());
-                    dto.setEmail(adultoMayor.getUsuario().getEmail());
-                    return dto;
-                })
+                .stream().map(this::armarResponseAdulto)
                 .collect(Collectors.toList());
-    }
-
-    public AdultoMayorRespuestaDTO obtenerAdultoMayorPorId(Long idAdultoMayor) {
-
-        AdultoMayor adultoMayor = adultoMayorRepository.findById(idAdultoMayor)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
-
-        AdultoMayorRespuestaDTO response =
-                modelMapper.map(adultoMayor, AdultoMayorRespuestaDTO.class);
-        response.setNombreCompleto(adultoMayor.getUsuario().getNombreCompleto());
-        response.setEmail(adultoMayor.getUsuario().getEmail());
-
-        return response;
     }
 
     public List<CuidadorRespuestaDTO> listarCuidadores() {
-
         return cuidadorRepository.findAll()
-                .stream()
-                .map(cuidador -> {
-                    CuidadorRespuestaDTO dto =
-                            modelMapper.map(cuidador, CuidadorRespuestaDTO.class);
-                    dto.setNombreCompleto(cuidador.getUsuario().getNombreCompleto());
-                    dto.setEmail(cuidador.getUsuario().getEmail());
-                    return dto;
-                })
+                .stream().map(this::armarResponseCuidador)
                 .collect(Collectors.toList());
     }
 
-    public CuidadorRespuestaDTO obtenerCuidadorPorId(Long idCuidador) {
 
-        Cuidador cuidador = cuidadorRepository.findById(idCuidador)
-                .orElseThrow(() -> new RuntimeException("Cuidador no encontrado"));
-
-        CuidadorRespuestaDTO response =
-                modelMapper.map(cuidador, CuidadorRespuestaDTO.class);
-        response.setNombreCompleto(cuidador.getUsuario().getNombreCompleto());
-        response.setEmail(cuidador.getUsuario().getEmail());
-
-        return response;
+    public AdultoMayorRespuestaDTO obtenerAdultoMayorPorId(Long id) {
+        return armarResponseAdulto(adultoMayorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado")));
     }
 
-    public AdultoMayorRespuestaDTO editarAdultoMayor(Long idAdultoMayor, AdultoMayorLlamarDTO dto) {
+    public CuidadorRespuestaDTO obtenerCuidadorPorId(Long id) {
+        return armarResponseCuidador(cuidadorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cuidador no encontrado")));
+    }
 
-        AdultoMayor adultoMayor = adultoMayorRepository.findById(idAdultoMayor)
+    public AdultoMayorRespuestaDTO editarAdultoMayor(Long id, AdultoMayorLlamarDTO dto) {
+
+        AdultoMayor adultoMayor = adultoMayorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
 
-        Usuario usuario = adultoMayor.getUsuario();
-        usuario.setNombreCompleto(dto.getNombreCompleto());
-        usuario.setEmail(dto.getEmail());
-        usuarioRepository.save(usuario);
+        User user = adultoMayor.getUser();
+        user.setNombreCompleto(dto.getNombreCompleto());
+        user.setEmail(dto.getEmail());
+        user.setUsername(dto.getEmail());
 
-        adultoMayor.setFechaNacimiento(dto.getFechaNacimiento());
-        adultoMayor.setDireccion(dto.getDireccion());
+        if (dto.getContenidoFoto() != null && !dto.getContenidoFoto().isEmpty()) {
+            if (dto.getContenidoFoto().startsWith("data:image") || dto.getContenidoFoto().length() > 1000) {
+                String url = cloudinaryService.subirBase64(dto.getContenidoFoto());
+                user.setContenidoFoto(url);
+            } else if (dto.getContenidoFoto().startsWith("http")) {
+                user.setContenidoFoto(dto.getContenidoFoto());
+            }
+        } else {
+            user.setContenidoFoto(null);
+        }
 
-        AdultoMayor guardado = adultoMayorRepository.save(adultoMayor);
+        userRepository.save(user);
 
-        AdultoMayorRespuestaDTO response =
-                modelMapper.map(guardado, AdultoMayorRespuestaDTO.class);
-        response.setNombreCompleto(usuario.getNombreCompleto());
-        response.setEmail(usuario.getEmail());
+        if (dto.getFechaNacimiento() != null) {
+            adultoMayor.setFechaNacimiento(dto.getFechaNacimiento());
+        }
 
-        return response;
+        return armarResponseAdulto(adultoMayorRepository.save(adultoMayor));
     }
 
-    public CuidadorRespuestaDTO editarCuidador(Long idCuidador, CuidadorLlamarDTO dto) {
+    public CuidadorRespuestaDTO editarCuidador(Long id, CuidadorLlamarDTO dto) {
 
-        Cuidador cuidador = cuidadorRepository.findById(idCuidador)
+        Cuidador cuidador = cuidadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cuidador no encontrado"));
 
-        Usuario usuario = cuidador.getUsuario();
-        usuario.setNombreCompleto(dto.getNombreCompleto());
-        usuario.setEmail(dto.getEmail());
-        usuarioRepository.save(usuario);
+        User user = cuidador.getUser();
+        user.setNombreCompleto(dto.getNombreCompleto());
+        user.setEmail(dto.getEmail());
+        user.setUsername(dto.getEmail());
 
-        cuidador.setEspecialidad(dto.getEspecialidad());
+        if (dto.getContenidoFoto() != null && !dto.getContenidoFoto().isEmpty()) {
+            if (dto.getContenidoFoto().startsWith("data:image") || dto.getContenidoFoto().length() > 1000) {
+                String url = cloudinaryService.subirBase64(dto.getContenidoFoto());
+                user.setContenidoFoto(url);
+            } else if (dto.getContenidoFoto().startsWith("http")) {
+                user.setContenidoFoto(dto.getContenidoFoto());
+            }
+        } else {
+            user.setContenidoFoto(null);
+        }
+
+        userRepository.save(user);
+
         cuidador.setTelefono(dto.getTelefono());
         cuidador.setBiografia(dto.getBiografia());
 
-        Cuidador guardado = cuidadorRepository.save(cuidador);
+        return armarResponseCuidador(cuidadorRepository.save(cuidador));
+    }
 
+    private AdultoMayorRespuestaDTO armarResponseAdulto(AdultoMayor adultoMayor) {
+        AdultoMayorRespuestaDTO response =
+                modelMapper.map(adultoMayor, AdultoMayorRespuestaDTO.class);
+        response.setNombreCompleto(adultoMayor.getUser().getNombreCompleto());
+        response.setEmail(adultoMayor.getUser().getEmail());
+        response.setContenidoFoto(adultoMayor.getUser().getContenidoFoto());
+        return response;
+    }
+
+    private CuidadorRespuestaDTO armarResponseCuidador(Cuidador cuidador) {
         CuidadorRespuestaDTO response =
-                modelMapper.map(guardado, CuidadorRespuestaDTO.class);
-        response.setNombreCompleto(usuario.getNombreCompleto());
-        response.setEmail(usuario.getEmail());
-
+                modelMapper.map(cuidador, CuidadorRespuestaDTO.class);
+        response.setNombreCompleto(cuidador.getUser().getNombreCompleto());
+        response.setEmail(cuidador.getUser().getEmail());
+        response.setContenidoFoto(cuidador.getUser().getContenidoFoto());
         return response;
     }
 }

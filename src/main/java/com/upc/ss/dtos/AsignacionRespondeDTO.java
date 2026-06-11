@@ -22,4 +22,6 @@ public class AsignacionRespondeDTO {
     private String estado;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
+    private String fotoAdultoMayor;
+    private String fotoCuidador;
 }

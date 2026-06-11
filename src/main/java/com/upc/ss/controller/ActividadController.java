@@ -3,103 +3,95 @@ package com.upc.ss.controller;
 import com.upc.ss.dtos.ActividadLlamadoDTO;
 import com.upc.ss.dtos.ActividadRespondeDTO;
 import com.upc.ss.services.ActividadService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import com.upc.ss.security.services.CustomUserDetails; // Importa tu clase
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication; // ¡Importación clave!
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Actividades", description = "Calendario compartido entre adulto mayor y cuidador")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true", exposedHeaders = "Authorization")
 public class ActividadController {
+
     @Autowired
     private ActividadService actividadService;
 
-    @Operation(summary = "Crear una actividad en el calendario",
-            description = "Solo se puede crear si la asignación está ACTIVA")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Actividad creada correctamente"),
-            @ApiResponse(responseCode = "400", description = "La asignación no está activa"),
-            @ApiResponse(responseCode = "404", description = "Asignación no encontrada")
-    })
     @PostMapping("/actividad/registrar")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR') or hasRole('ROLE_ADULTO_MAYOR')")
     public ResponseEntity<ActividadRespondeDTO> crearActividad(
-            @RequestBody @Valid ActividadLlamadoDTO dto) {
+            @RequestBody @Valid ActividadLlamadoDTO dto,
+            Authentication authentication) {
 
-        ActividadRespondeDTO response = actividadService.crearActividad(dto);
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
+        ActividadRespondeDTO response = actividadService.crearActividad(dto, usuarioLogueado);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Obtener todas las actividades del calendario de una asignación")
-    @ApiResponse(responseCode = "200", description = "Lista de actividades obtenida")
     @GetMapping("/asignacion/actividades/{idAsignacion}")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR') or hasRole('ROLE_ADULTO_MAYOR')")
     public ResponseEntity<List<ActividadRespondeDTO>> obtenerActividades(
-            @PathVariable Long idAsignacion) {
+            @PathVariable Long idAsignacion,
+            Authentication authentication) {
 
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
         List<ActividadRespondeDTO> response =
-                actividadService.obtenerActividadesPorAsignacion(idAsignacion);
+                actividadService.obtenerActividadesPorAsignacion(idAsignacion, usuarioLogueado.getId());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Obtener actividades por estado",
-            description = "Estados: PENDIENTE, EN_CURSO, COMPLETADA, CANCELADA")
     @GetMapping("/asignacion/{idAsignacion}/estado/{estado}")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR') or hasRole('ROLE_ADULTO_MAYOR')")
     public ResponseEntity<List<ActividadRespondeDTO>> obtenerPorEstado(
             @PathVariable Long idAsignacion,
-            @PathVariable String estado) {
+            @PathVariable String estado,
+            Authentication authentication) {
 
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
         List<ActividadRespondeDTO> response =
-                actividadService.obtenerPorEstado(idAsignacion, estado);
+                actividadService.obtenerPorEstado(idAsignacion, estado, usuarioLogueado.getId());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Actualizar el estado de una actividad")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Estado actualizado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Actividad no encontrada")
-    })
     @PatchMapping("/{idActividad}/estado/{nuevoEstado}")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR') or hasRole('ROLE_ADULTO_MAYOR')")
     public ResponseEntity<ActividadRespondeDTO> actualizarEstado(
             @PathVariable Long idActividad,
-            @PathVariable String nuevoEstado) {
+            @PathVariable String nuevoEstado,
+            Authentication authentication) {
 
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
         ActividadRespondeDTO response =
-                actividadService.actualizarEstado(idActividad, nuevoEstado);
+                actividadService.actualizarEstado(idActividad, nuevoEstado, usuarioLogueado.getId());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Editar una actividad del calendario")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Actividad editada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Actividad no encontrada")
-    })
     @PutMapping("/actividad/editar/{idActividad}")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR') or hasRole('ROLE_ADULTO_MAYOR')")
     public ResponseEntity<ActividadRespondeDTO> editarActividad(
             @PathVariable Long idActividad,
-            @RequestBody @Valid ActividadLlamadoDTO dto) {
+            @RequestBody @Valid ActividadLlamadoDTO dto,
+            Authentication authentication) {
 
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
         ActividadRespondeDTO response =
-                actividadService.editarActividad(idActividad, dto);
+                actividadService.editarActividad(idActividad, dto, usuarioLogueado.getId());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Eliminar una actividad del calendario")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Actividad eliminada correctamente"),
-            @ApiResponse(responseCode = "404", description = "Actividad no encontrada")
-    })
     @DeleteMapping("/{idActividad}")
+    @PreAuthorize("hasRole('ROLE_CUIDADOR')")
     public ResponseEntity<Void> eliminarActividad(
-            @PathVariable Long idActividad) {
+            @PathVariable Long idActividad,
+            Authentication authentication) {
 
-        actividadService.eliminarActividad(idActividad);
+        CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
+        actividadService.eliminarActividad(idActividad, usuarioLogueado.getId());
         return ResponseEntity.noContent().build();
     }
 }

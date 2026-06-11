@@ -84,7 +84,7 @@ public class GaleriaIAService {
         GaleriaIARespondeDTO respuesta = modelMapper.map(retrato, GaleriaIARespondeDTO.class);
         respuesta.setIdAdultoMayor(retrato.getAdultoMayor().getIdAdultoMayor());
         respuesta.setNombreAdultoMayor(
-                retrato.getAdultoMayor().getUsuario().getNombreCompleto());
+                retrato.getAdultoMayor().getUser().getNombreCompleto());
         respuesta.setPromptDescripcion(retrato.getPrompt_descripcion());
         return respuesta;
     }

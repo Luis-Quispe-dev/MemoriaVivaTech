@@ -14,8 +14,8 @@ public class CuidadorRespuestaDTO {
     private Long idCuidador;
     private String nombreCompleto;
     private String email;
-    private String especialidad;
     private String telefono;
     private String biografia;
     private Boolean notificacionActiva;
+    private String contenidoFoto;
 }

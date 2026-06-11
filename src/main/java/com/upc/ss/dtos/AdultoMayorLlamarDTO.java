@@ -21,9 +21,7 @@ public class AdultoMayorLlamarDTO {
     @Email(message = "El email no es válido")
     @NotBlank(message = "El email es obligatorio")
     private String email;
-    @NotBlank(message = "La contraseña es obligatoria")
     private String contrasena;
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
     private LocalDate fechaNacimiento;
-    private String direccion;
+    private String contenidoFoto;
 }

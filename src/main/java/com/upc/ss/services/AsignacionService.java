@@ -27,9 +27,11 @@ public class AsignacionService {
                 .orElseThrow(() -> new RuntimeException("El adulto mayor no tiene una asignación activa"));
 
         AsignacionRespondeDTO response = modelMapper.map(asignacion, AsignacionRespondeDTO.class);
-        response.setNombreAdultoMayor(asignacion.getAdultoMayor().getUsuario().getNombreCompleto());
-        response.setNombreCuidador(asignacion.getCuidador().getUsuario().getNombreCompleto());
+        response.setNombreAdultoMayor(asignacion.getAdultoMayor().getUser().getNombreCompleto());
+        response.setNombreCuidador(asignacion.getCuidador().getUser().getNombreCompleto());
         response.setIdSolicitud(asignacion.getSolicitud().getIdSolicitud());
+        response.setFotoAdultoMayor(asignacion.getAdultoMayor().getUser().getContenidoFoto());
+        response.setFotoCuidador(asignacion.getCuidador().getUser().getContenidoFoto());
 
         return response;
     }
@@ -40,9 +42,11 @@ public class AsignacionService {
 
         return asignaciones.stream().map(a -> {
             AsignacionRespondeDTO dto = modelMapper.map(a, AsignacionRespondeDTO.class);
-            dto.setNombreAdultoMayor(a.getAdultoMayor().getUsuario().getNombreCompleto());
-            dto.setNombreCuidador(a.getCuidador().getUsuario().getNombreCompleto());
+            dto.setNombreAdultoMayor(a.getAdultoMayor().getUser().getNombreCompleto());
+            dto.setNombreCuidador(a.getCuidador().getUser().getNombreCompleto());
             dto.setIdSolicitud(a.getSolicitud().getIdSolicitud());
+            dto.setFotoAdultoMayor(a.getAdultoMayor().getUser().getContenidoFoto());
+            dto.setFotoCuidador(a.getCuidador().getUser().getContenidoFoto());
             return dto;
         }).collect(Collectors.toList());
     }

@@ -13,7 +13,13 @@ import lombok.Setter;
 @AllArgsConstructor
 
 public class RecuperarContresenaDTO {
-    @Email(message = "El email no es váilido")
+    @Email(message = "El email no es válido")
     @NotBlank(message = "El email es obligatorio")
     private String email;
+
+    @NotBlank(message = "La nueva contraseña es obligatoria")
+    private String nuevaContrasena;
+
+    @NotBlank(message = "Confirma la nueva contraseña")
+    private String confirmarContrasena;
 }

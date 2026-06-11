@@ -111,7 +111,7 @@ public class SuscripcionService {
         PagoRespondeDTO response = new PagoRespondeDTO();
         response.setIdPago(guardado.getIdPago());
         response.setIdAdultoMayor(adultoMayor.getIdAdultoMayor());
-        response.setNombreAdultoMayor(adultoMayor.getUsuario().getNombreCompleto());
+        response.setNombreAdultoMayor(adultoMayor.getUser().getNombreCompleto());
         response.setNombrePlan(plan.getNombrePlan());
         response.setMonto(guardado.getMonto());
         response.setMetodoPago(guardado.getMetodoPago());
@@ -131,7 +131,7 @@ public class SuscripcionService {
                     dto.setIdPago(pago.getIdPago());
                     dto.setIdAdultoMayor(pago.getAdultoMayor().getIdAdultoMayor());
                     dto.setNombreAdultoMayor(
-                            pago.getAdultoMayor().getUsuario().getNombreCompleto());
+                            pago.getAdultoMayor().getUser().getNombreCompleto());
                     dto.setNombrePlan(pago.getPlan().getNombrePlan());
                     dto.setMonto(pago.getMonto());
                     dto.setMetodoPago(pago.getMetodoPago());
@@ -148,7 +148,7 @@ public class SuscripcionService {
         response.setIdSuscripcion(suscripcion.getIdSuscripcion());
         response.setIdAdultoMayor(suscripcion.getAdultoMayor().getIdAdultoMayor());
         response.setNombreAdultoMayor(
-                suscripcion.getAdultoMayor().getUsuario().getNombreCompleto());
+                suscripcion.getAdultoMayor().getUser().getNombreCompleto());
         response.setNombrePlan(suscripcion.getPlan().getNombrePlan());
         response.setPrecio(suscripcion.getPlan().getPrecio());
         response.setLimiteRecuerdos(suscripcion.getPlan().getLimiteRecuerdos());

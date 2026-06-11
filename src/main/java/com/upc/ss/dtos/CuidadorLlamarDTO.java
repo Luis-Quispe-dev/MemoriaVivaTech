@@ -17,9 +17,8 @@ public class CuidadorLlamarDTO {
     @Email(message = "El email no es válido")
     @NotBlank(message = "El email es obligatorio")
     private String email;
-    @NotBlank(message = "La contraseña es obligatoria")
     private String contrasena;
-    private String especialidad;
     private String telefono;
     private String biografia;
+    private String contenidoFoto;
 }

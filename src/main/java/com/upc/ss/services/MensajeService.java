@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import com.upc.ss.security.services.CustomUserDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,14 +31,14 @@ public class MensajeService {
         MensajeRespondeDTO response = modelMapper.map(mensaje, MensajeRespondeDTO.class);
         response.setIdAsignacion(mensaje.getAsignacion().getIdAsignacion());
         response.setNombreAdultoMayor(
-                mensaje.getAsignacion().getAdultoMayor().getUsuario().getNombreCompleto());
+                mensaje.getAsignacion().getAdultoMayor().getUser().getNombreCompleto());
         response.setNombreCuidador(
-                mensaje.getAsignacion().getCuidador().getUsuario().getNombreCompleto());
+                mensaje.getAsignacion().getCuidador().getUser().getNombreCompleto());
 
         return response;
     }
 
-    public MensajeRespondeDTO enviarMensaje(MensajeLlamarDTO dto) {
+    public MensajeRespondeDTO enviarMensaje(MensajeLlamarDTO dto, CustomUserDetails usuarioLogueado) {
         Asignacion asignacion = asignacionRepository
                 .findById(dto.getIdAsignacion())
                 .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
@@ -45,20 +47,44 @@ public class MensajeService {
             throw new RuntimeException("No se puede enviar mensajes en una asignación finalizada");
         }
 
+        Long idLogueado = usuarioLogueado.getId();
+        Long idUserAdulto = asignacion.getAdultoMayor().getUser().getId();
+        Long idUserCuidador = asignacion.getCuidador().getUser().getId();
+
+        if (!idLogueado.equals(idUserAdulto) && !idLogueado.equals(idUserCuidador)) {
+            throw new RuntimeException("Acceso denegado: No formas parte de esta asignación de chat.");
+        }
+
         Mensaje mensaje = new Mensaje();
         mensaje.setAsignacion(asignacion);
         mensaje.setContenido(dto.getContenido());
         mensaje.setFechaHora(LocalDateTime.now());
         mensaje.setLeido(false);
-        mensaje.setTipoRemitente(Mensaje.TipoRemitente.valueOf(dto.getTipoRemitente()));
+
+        boolean esAdulto = usuarioLogueado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADULTO_MAYOR"));
+
+        if (esAdulto) {
+            mensaje.setTipoRemitente(Mensaje.TipoRemitente.ADULTO_MAYOR);
+        } else {
+            mensaje.setTipoRemitente(Mensaje.TipoRemitente.CUIDADOR);
+        }
 
         Mensaje guardado = mensajeRepository.save(mensaje);
 
         return armarResponse(guardado);
     }
-    public List<MensajeRespondeDTO> obtenerMensajesPorAsignacion(Long idAsignacion) {
-        asignacionRepository.findById(idAsignacion)
+
+    public List<MensajeRespondeDTO> obtenerMensajesPorAsignacion(Long idAsignacion, Long idUsuarioLogueado) {
+        Asignacion asignacion = asignacionRepository.findById(idAsignacion)
                 .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+        Long idUserAdulto = asignacion.getAdultoMayor().getUser().getId();
+        Long idUserCuidador = asignacion.getCuidador().getUser().getId();
+
+        if (!idUsuarioLogueado.equals(idUserAdulto) && !idUsuarioLogueado.equals(idUserCuidador)) {
+            throw new RuntimeException("Acceso denegado: No tienes permiso para ver este chat.");
+        }
 
         List<Mensaje> mensajes = mensajeRepository
                 .findByAsignacionIdAsignacionOrderByFechaHoraAsc(idAsignacion);
@@ -67,13 +93,31 @@ public class MensajeService {
                 .map(this::armarResponse)
                 .collect(Collectors.toList());
     }
-    public void marcarComoLeidos(Long idAsignacion) {
+    public void marcarComoLeidos(Long idAsignacion, Long idUsuarioLogueado) {
+        Asignacion asignacion = asignacionRepository.findById(idAsignacion)
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+
+        Long idUserAdulto = asignacion.getAdultoMayor().getUser().getId();
+        Long idUserCuidador = asignacion.getCuidador().getUser().getId();
+
+        if (!idUsuarioLogueado.equals(idUserAdulto) && !idUsuarioLogueado.equals(idUserCuidador)) {
+            throw new RuntimeException("Acceso denegado: No tienes permiso para modificar este chat.");
+        }
 
         List<Mensaje> noLeidos = mensajeRepository
                 .findByAsignacionIdAsignacionAndLeidoFalse(idAsignacion);
 
-        noLeidos.forEach(m -> m.setLeido(true));
+        List<Mensaje> aMarcar = noLeidos.stream().filter(m -> {
+            if (idUsuarioLogueado.equals(idUserAdulto)) {
+                return m.getTipoRemitente() == Mensaje.TipoRemitente.CUIDADOR;
+            } else {
+                return m.getTipoRemitente() == Mensaje.TipoRemitente.ADULTO_MAYOR;
+            }
+        }).collect(Collectors.toList());
 
-        mensajeRepository.saveAll(noLeidos);
+        if (!aMarcar.isEmpty()) {
+            aMarcar.forEach(m -> m.setLeido(true));
+            mensajeRepository.saveAll(aMarcar);
+        }
     }
 }

@@ -12,6 +12,7 @@ import com.upc.ss.repositories.AdultoMayorRepository;
 import com.upc.ss.repositories.AsignacionRepository;
 import com.upc.ss.repositories.CuidadorRepository;
 import com.upc.ss.repositories.SolicitudRepository;
+import com.upc.ss.security.services.CustomUserDetails;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,25 @@ public class SolicitudService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public SolicitudRespondeDTO crearSolicitud(SolicitudLlamarDTO dto) {
+    public SolicitudRespondeDTO crearSolicitud(SolicitudLlamarDTO dto, CustomUserDetails usuarioLogueado) {
+        Long idLogueado = usuarioLogueado.getId();
+        boolean esAdulto = usuarioLogueado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADULTO_MAYOR"));
+        boolean esCuidador = usuarioLogueado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CUIDADOR"));
+
+        if (esAdulto) {
+            if (!dto.getIdAdultoMayor().equals(idLogueado)) {
+                throw new RuntimeException("Acceso denegado: No puedes crear una solicitud usando el ID de otro adulto mayor.");
+            }
+            dto.setIniciadoPor("ADULTO_MAYOR");
+        }
+        else if (esCuidador) {
+            if (!dto.getIdCuidador().equals(idLogueado)) {
+                throw new RuntimeException("Acceso denegado: No puedes crear una solicitud usando el ID de otro cuidador.");
+            }
+            dto.setIniciadoPor("CUIDADOR");
+        }
 
         AdultoMayor adultoMayor = adultoMayorRepository
                 .findById(dto.getIdAdultoMayor())
@@ -76,28 +95,51 @@ public class SolicitudService {
         Solicitud guardada = solicitudRepository.save(solicitud);
 
         SolicitudRespondeDTO response = modelMapper.map(guardada, SolicitudRespondeDTO.class);
-        response.setNombreAdultoMayor(adultoMayor.getUsuario().getNombreCompleto());
-        response.setNombreCuidador(cuidador.getUsuario().getNombreCompleto());
+        response.setNombreAdultoMayor(adultoMayor.getUser().getNombreCompleto());
+        response.setNombreCuidador(cuidador.getUser().getNombreCompleto());
+        response.setFotoCuidador(cuidador.getUser().getContenidoFoto());
 
         return response;
     }
 
-    public AsignacionRespondeDTO responderSolicitud(SolicitudRespuestaDTO dto) {
+    public AsignacionRespondeDTO responderSolicitud(SolicitudRespuestaDTO dto, Long idUsuarioLogueado) {
         Solicitud solicitud = solicitudRepository
                 .findById(dto.getIdSolicitud())
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
+        Long idUserAdulto = solicitud.getAdultoMayor().getUser().getId();
+        Long idUserCuidador = solicitud.getCuidador().getUser().getId();
+
+        if (!idUserAdulto.equals(idUsuarioLogueado) && !idUserCuidador.equals(idUsuarioLogueado)) {
+            throw new RuntimeException("Acceso denegado: No perteneces a esta solicitud.");
+        }
+        if (solicitud.getIniciadoPor() == Solicitud.IniciadoPor.ADULTO_MAYOR) {
+            // Si la inició el Adulto Mayor, el usuario logueado TIENE que ser el Cuidador
+            if (!idUserCuidador.equals(idUsuarioLogueado)) {
+                throw new RuntimeException("Acceso denegado: Esperando la respuesta del Cuidador.");
+            }
+        } else if (solicitud.getIniciadoPor() == Solicitud.IniciadoPor.CUIDADOR) {
+            // Si la inició el Cuidador, el usuario logueado TIENE que ser el Adulto Mayor
+            if (!idUserAdulto.equals(idUsuarioLogueado)) {
+                throw new RuntimeException("Acceso denegado: Esperando la respuesta del Adulto Mayor.");
+            }
+        }
+
         if (!solicitud.getEstado().equals(Solicitud.Estado.PENDIENTE)) {
             throw new RuntimeException("La solicitud ya fue respondida anteriormente");
         }
+
         Solicitud.Estado nuevaRespuesta = Solicitud.Estado.valueOf(dto.getRespuesta());
+
         if (nuevaRespuesta.equals(Solicitud.Estado.RECHAZADA)) {
             solicitud.setEstado(Solicitud.Estado.RECHAZADA);
             solicitudRepository.save(solicitud);
             throw new RuntimeException("Solicitud rechazada correctamente");
         }
+
         solicitud.setEstado(Solicitud.Estado.ACEPTADA);
         solicitudRepository.save(solicitud);
+
         Optional<Asignacion> asignacionActiva = asignacionRepository
                 .findByAdultoMayorIdAdultoMayorAndEstado(
                         solicitud.getAdultoMayor().getIdAdultoMayor(),
@@ -109,6 +151,7 @@ public class SolicitudService {
             anterior.setFechaFin(LocalDateTime.now());
             asignacionRepository.save(anterior);
         }
+
         Asignacion nueva = new Asignacion();
         nueva.setCuidador(solicitud.getCuidador());
         nueva.setAdultoMayor(solicitud.getAdultoMayor());
@@ -119,9 +162,10 @@ public class SolicitudService {
         Asignacion guardada = asignacionRepository.save(nueva);
 
         AsignacionRespondeDTO response = modelMapper.map(guardada, AsignacionRespondeDTO.class);
-        response.setNombreAdultoMayor(solicitud.getAdultoMayor().getUsuario().getNombreCompleto());
-        response.setNombreCuidador(solicitud.getCuidador().getUsuario().getNombreCompleto());
+        response.setNombreAdultoMayor(solicitud.getAdultoMayor().getUser().getNombreCompleto());
+        response.setNombreCuidador(solicitud.getCuidador().getUser().getNombreCompleto());
         response.setIdSolicitud(solicitud.getIdSolicitud());
+
         return response;
     }
 
@@ -131,8 +175,9 @@ public class SolicitudService {
         return solicitudes.stream().map(s -> {
             SolicitudRespondeDTO dto = modelMapper
                     .map(s, SolicitudRespondeDTO.class);
-            dto.setNombreAdultoMayor(s.getAdultoMayor().getUsuario().getNombreCompleto());
-            dto.setNombreCuidador(s.getCuidador().getUsuario().getNombreCompleto());
+            dto.setNombreAdultoMayor(s.getAdultoMayor().getUser().getNombreCompleto());
+            dto.setNombreCuidador(s.getCuidador().getUser().getNombreCompleto());
+            dto.setFotoCuidador(s.getCuidador().getUser().getContenidoFoto());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -142,8 +187,9 @@ public class SolicitudService {
                 .findByAdultoMayorIdAdultoMayorAndEstado(idAdultoMayor, Solicitud.Estado.PENDIENTE);
         return solicitudes.stream().map(s -> {
             SolicitudRespondeDTO dto = modelMapper.map(s, SolicitudRespondeDTO.class);
-            dto.setNombreAdultoMayor(s.getAdultoMayor().getUsuario().getNombreCompleto());
-            dto.setNombreCuidador(s.getCuidador().getUsuario().getNombreCompleto());
+            dto.setNombreAdultoMayor(s.getAdultoMayor().getUser().getNombreCompleto());
+            dto.setNombreCuidador(s.getCuidador().getUser().getNombreCompleto());
+            dto.setFotoCuidador(s.getCuidador().getUser().getContenidoFoto());
             return dto;
         }).collect(Collectors.toList());
     }

@@ -149,7 +149,7 @@ public class RecuerdoService {
 
         RecuerdoRespondeDTO response = modelMapper.map(recuerdo, RecuerdoRespondeDTO.class);
         response.setIdAdultoMayor(recuerdo.getAdultoMayor().getIdAdultoMayor());
-        response.setNombreAdultoMayor(recuerdo.getAdultoMayor().getUsuario().getNombreCompleto());
+        response.setNombreAdultoMayor(recuerdo.getAdultoMayor().getUser().getNombreCompleto());
         response.setTipoRecuerdo(recuerdo.getTipoRecuerdo().name());
         return response;
     }
@@ -165,7 +165,7 @@ public class RecuerdoService {
                 .map(this::armarResponse)
                 .collect(Collectors.toList());
     }
-    
+
     public RecuerdoRespondeDTO toggleFavorito(Long idRecuerdo) {
 
         Recuerdo recuerdo = recuerdoRepository.findById(idRecuerdo)

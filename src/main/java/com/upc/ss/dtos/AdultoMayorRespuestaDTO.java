@@ -17,5 +17,5 @@ public class AdultoMayorRespuestaDTO {
     private String nombreCompleto;
     private String email;
     private LocalDate fechaNacimiento;
-    private String direccion;
+    private String contenidoFoto;
 }
