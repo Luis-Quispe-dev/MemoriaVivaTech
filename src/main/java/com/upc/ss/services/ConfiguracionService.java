@@ -25,11 +25,11 @@ public class ConfiguracionService {
     public ConfiguracionRespondeDTO crearConfiguracionInicial(Long idUser) {
 
         User user = userRepository.findById(idUser)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado :c"));
 
         configuracionRepository.findByUserId(idUser)
                 .ifPresent(c -> {
-                    throw new RuntimeException("Ya tiene configuración");
+                    throw new RuntimeException("Ya tiene configuración c:");
                 });
 
         Configuracion configuracion = new Configuracion();
@@ -46,14 +46,14 @@ public class ConfiguracionService {
 
         Configuracion configuracion = configuracionRepository
                 .findByUserId(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Configuración no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Configuración no encontrada :c"));
 
         return armarRespuesta(configuracion);
     }
 
     public ConfiguracionRespondeDTO guardarCambios(ConfiguracionLlamadoDTO dto) {
         User usuario = userRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado :c"));
 
         Configuracion configuracion = configuracionRepository
                 .findByUserId(dto.getIdUsuario())
