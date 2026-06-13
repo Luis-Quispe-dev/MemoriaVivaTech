@@ -61,7 +61,7 @@ public class AuthController {
                 .collect(Collectors.toSet());
 
         User user = userRepository.findByUsername(authRequest.getUsername())
-                .orElseThrow(() -> new Exception("User not found"));
+                .orElseThrow(() -> new Exception("User not found :c"));
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("Authorization", token);
