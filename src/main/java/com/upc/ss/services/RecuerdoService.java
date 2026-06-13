@@ -83,7 +83,7 @@ public class RecuerdoService {
 
         if (dto.getFormato() == null ||
                 !FORMATOS_FOTO.contains(dto.getFormato().toLowerCase()))
-            throw new RuntimeException("Formato inválido, debe ser jpg, png o webp");
+            throw new RuntimeException("Formato inválido, debe ser jpg, png o webp :c");
 
         Recuerdo recuerdo = new Recuerdo();
         recuerdo.setAdultoMayor(adultoMayor);
@@ -100,7 +100,7 @@ public class RecuerdoService {
     public List<RecuerdoRespondeDTO> obtenerTodos(Long idAdultoMayor) {
 
         adultoMayorRepository.findById(idAdultoMayor)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado :c"));
 
         return recuerdoRepository
                 .findByAdultoMayorIdAdultoMayorOrderByFechaCreacionDesc(idAdultoMayor)
@@ -110,7 +110,7 @@ public class RecuerdoService {
     public List<RecuerdoRespondeDTO> obtenerPorTipo(Long idAdultoMayor, String tipo) {
 
         adultoMayorRepository.findById(idAdultoMayor)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado :c"));
 
         return recuerdoRepository
                 .findByAdultoMayorIdAdultoMayorAndTipoRecuerdoOrderByFechaCreacionDesc(
@@ -122,8 +122,9 @@ public class RecuerdoService {
     public RecuerdoRespondeDTO obtenerPorId(Long idRecuerdo) {
 
         return armarResponse(recuerdoRepository.findById(idRecuerdo)
-                .orElseThrow(() -> new RuntimeException("Recuerdo no encontrado")));
+                .orElseThrow(() -> new RuntimeException("Recuerdo no encontrado :c")));
     }
+
 
     public RecuerdoRespondeDTO editarRecuerdo(Long idRecuerdo, RecuerdoLlamadoDTO dto) {
 
