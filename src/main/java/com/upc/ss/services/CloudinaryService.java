@@ -13,6 +13,7 @@ import java.util.Map;
 public class CloudinaryService {
     @Autowired
     private Cloudinary cloudinary;
+
     public String subirBase64(String base64Completo) {
 
         try {
@@ -33,7 +34,7 @@ public class CloudinaryService {
             return (String) resultado.get("secure_url");
 
         } catch (Exception e) {
-            throw new RuntimeException("Error al subir imagen a Cloudinary: " + e.getMessage());
+            throw new RuntimeException("Error al subir imagen a Cloudinary :c : " + e.getMessage());
         }
     }
 
