@@ -50,18 +50,18 @@ public class UsuarioService {
     public AdultoMayorRespuestaDTO registrarAdultoMayor(AdultoMayorLlamarDTO dto) {
 
         if (dto.getContrasena() == null || dto.getContrasena().trim().isEmpty()) {
-            throw new RuntimeException("La contraseña es obligatoria para el registro");
+            throw new RuntimeException("La contraseña es obligatoria para el registro :c");
         }
 
         if (dto.getFechaNacimiento() == null) {
-            throw new RuntimeException("La fecha de nacimiento es obligatoria para el registro");
+            throw new RuntimeException("La fecha de nacimiento es obligatoria para el registro :c ");
         }
 
         if (userRepository.existsByEmail(dto.getEmail()))
-            throw new RuntimeException("El email ya está registrado");
+            throw new RuntimeException("El email ya está registrado :c ");
 
         Role rol = roleRepository.findByName("ROLE_ADULTO_MAYOR")
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado :c "));
 
         User user = new User();
         user.setUsername(dto.getEmail());
@@ -85,14 +85,14 @@ public class UsuarioService {
     public CuidadorRespuestaDTO registrarCuidador(CuidadorLlamarDTO dto) {
 
         if (dto.getContrasena() == null || dto.getContrasena().trim().isEmpty()) {
-            throw new RuntimeException("La contraseña es obligatoria para el registro");
+            throw new RuntimeException("La contraseña es obligatoria para el registro :c");
         }
 
         if (userRepository.existsByEmail(dto.getEmail()))
-            throw new RuntimeException("El email ya está registrado");
+            throw new RuntimeException("El email ya está registrado :c ");
 
         Role rol = roleRepository.findByName("ROLE_CUIDADOR")
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado :c"));
 
         User user = new User();
         user.setUsername(dto.getEmail());
