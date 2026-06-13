@@ -46,7 +46,7 @@ public class GaleriaIAService {
     public GaleriaIARespondeDTO guardarImagen(GaleriaIALlamadoDTO dto, String urlImagen){
         AdultoMayor adultoMayor = adultoMayorRepository
                 .findById(dto.getIdAdultoMayor())
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado :C"));
 
         GaleriaIA retrato = modelMapper.map(dto, GaleriaIA.class);
         retrato.setAdultoMayor(adultoMayor);
@@ -60,7 +60,7 @@ public class GaleriaIAService {
 
     public List<GaleriaIARespondeDTO> obtenerGaleria(Long idAdultoMayor) {
         adultoMayorRepository.findById(idAdultoMayor)
-                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Adulto mayor no encontrado :c"));
 
         return galeriaIARepository
                 .findByAdultoMayorIdAdultoMayorOrderByFechaCreacionDesc(idAdultoMayor)
