@@ -36,8 +36,8 @@ public class SuscripcionController {
             description = "Muestra el plan activo, días restantes y beneficios"
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Suscripción activa obtenida"),
-            @ApiResponse(responseCode = "404", description = "No tiene suscripción activa")
+            @ApiResponse(responseCode = "200", description = "Suscripción activa obtenida :c "),
+            @ApiResponse(responseCode = "404", description = "No tiene suscripción activa :C ")
     })
     @GetMapping("/adulto/{idAdultoMayor}/activa")
     public ResponseEntity<SuscripcionRespondeDTO> obtenerSuscripcionActiva(
@@ -68,7 +68,7 @@ public class SuscripcionController {
                 .body(suscripcionService.pagar(dto));
     }
 
-    @Operation(summary = "Ver historial de pagos del adulto mayor")
+    @Operation(summary = "Ver historial de pagos del adulto mayor: ")
     @GetMapping("/adulto/{idAdultoMayor}/pagos")
     public ResponseEntity<List<PagoRespondeDTO>> historialPagos(
             @PathVariable Long idAdultoMayor) {
