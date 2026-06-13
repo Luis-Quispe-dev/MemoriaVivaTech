@@ -20,7 +20,7 @@ import java.util.List;
 public class AsignacionController {
     @Autowired
     private AsignacionService asignacionService;
-    @Operation(summary = "Ver la asignación activa de un adulto mayor")
+    @Operation(summary = "Ver la asignación activa de un adulto mayor: ")
     @GetMapping("/adulto/{idAdultoMayor}/activa")
     public ResponseEntity<AsignacionRespondeDTO> asignacionActivaDeAdulto(
             @PathVariable Long idAdultoMayor) {
@@ -30,7 +30,7 @@ public class AsignacionController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Ver todos los adultos mayores activos de un cuidador")
+    @Operation(summary = "Ver todos los adultos mayores activos de un cuidador: ")
     @GetMapping("/cuidador/{idCuidador}/activas")
     public ResponseEntity<List<AsignacionRespondeDTO>> asignacionesActivasDeCuidador(
             @PathVariable Long idCuidador) {
