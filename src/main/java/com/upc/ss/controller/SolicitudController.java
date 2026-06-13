@@ -23,7 +23,7 @@ public class SolicitudController {
     private SolicitudService solicitudService;
 
     @PostMapping("/solicitud")
-    @PreAuthorize("hasRole('ADULTO_MAYOR') or hasRole('CUIDADOR')")
+    @PreAuthorize("hasRole('ADULTO_MAYOR ') or hasRole('CUIDADOR ')")
     public ResponseEntity<SolicitudRespondeDTO> crearSolicitud(@RequestBody @Valid SolicitudLlamarDTO dto, Authentication authentication) { // <-- Capturamos el token real
         CustomUserDetails usuarioLogueado = (CustomUserDetails) authentication.getPrincipal();
 
