@@ -23,13 +23,13 @@ public class AuthService {
                                     String confirmarContrasena) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email no registrado"));
+                .orElseThrow(() -> new RuntimeException("Email no registrado :c"));
 
         if (!passwordEncoder.matches(contrasenaActual, user.getPassword()))
-            throw new RuntimeException("La contraseña actual es incorrecta");
+            throw new RuntimeException("La contraseña actual es incorrecta :c");
 
         if (!nuevaContrasena.equals(confirmarContrasena))
-            throw new RuntimeException("Las contraseñas nuevas no coinciden");
+            throw new RuntimeException("Las contraseñas nuevas no coinciden :c");
 
         if (nuevaContrasena.length() < 6)
             throw new RuntimeException("La contraseña debe tener al menos 6 caracteres");
@@ -37,7 +37,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(nuevaContrasena));
         userRepository.save(user);
 
-        return "Contraseña actualizada correctamente";
+        return "Contraseña actualizada correctamente c:";
     }
 
     public String recuperarContrasena(String email,
