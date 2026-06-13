@@ -77,7 +77,7 @@ public class MensajeService {
 
     public List<MensajeRespondeDTO> obtenerMensajesPorAsignacion(Long idAsignacion, Long idUsuarioLogueado) {
         Asignacion asignacion = asignacionRepository.findById(idAsignacion)
-                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada :c "));
 
         Long idUserAdulto = asignacion.getAdultoMayor().getUser().getId();
         Long idUserCuidador = asignacion.getCuidador().getUser().getId();
@@ -95,7 +95,7 @@ public class MensajeService {
     }
     public void marcarComoLeidos(Long idAsignacion, Long idUsuarioLogueado) {
         Asignacion asignacion = asignacionRepository.findById(idAsignacion)
-                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada :C"));
 
         Long idUserAdulto = asignacion.getAdultoMayor().getUser().getId();
         Long idUserCuidador = asignacion.getCuidador().getUser().getId();
