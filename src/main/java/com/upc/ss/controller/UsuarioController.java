@@ -27,8 +27,8 @@ public class UsuarioController {
     @Operation(summary = "Registrar un adulto mayor",
             description = "Crea el usuario base y su perfil de adulto mayor en una sola llamada")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Adulto mayor registrado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado")
+            @ApiResponse(responseCode = "201", description = "Adulto mayor registrado exitosamente."),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado.")
     })
     @PostMapping("/adulto-mayor")
     public ResponseEntity<AdultoMayorRespuestaDTO> registrarAdultoMayor(
@@ -38,10 +38,10 @@ public class UsuarioController {
     }
 
     @Operation(summary = "Registrar un cuidador",
-            description = "Crea el usuario base y su perfil de cuidador en una sola llamada")
+            description = "Crea el usuario base y su perfil de cuidador en una sola llamada.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Cuidador registrado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado")
+            @ApiResponse(responseCode = "201", description = "Cuidador registrado exitosamente."),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado.")
     })
     @PostMapping("/cuidador")
     public ResponseEntity<CuidadorRespuestaDTO> registrarCuidador(
