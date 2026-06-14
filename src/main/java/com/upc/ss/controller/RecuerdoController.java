@@ -25,7 +25,7 @@ public class RecuerdoController {
 
     @Operation(summary = "Registrar recuerdo de texto — pantalla Escribir Memoria")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Recuerdo de texto guardado"),
+            @ApiResponse(responseCode = "201", description = "Recuerdo de texto guardado correctamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "404", description = "Adulto mayor no encontrado")
     })
@@ -40,7 +40,7 @@ public class RecuerdoController {
 
     @Operation(summary = "Registrar recuerdo de audio — pantalla Grabar Audio")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Recuerdo de audio guardado"),
+            @ApiResponse(responseCode = "201", description = "Recuerdo de audio guardado correctamente"),
             @ApiResponse(responseCode = "400", description = "Formato inválido, debe ser mp3 o wav"),
             @ApiResponse(responseCode = "404", description = "Adulto mayor no encontrado")
     })
@@ -53,7 +53,7 @@ public class RecuerdoController {
                 .body(recuerdoService.crearRecuerdoAudio(dto));
     }
 
-    @Operation(summary = "Registrar recuerdo de foto — pantalla Tomar Fotografía")
+    @Operation(summary = "Registrar recuerdo de foto — pantalla Tomar Fotografía correctamente")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Recuerdo de foto guardado"),
             @ApiResponse(responseCode = "400", description = "Formato inválido, debe ser jpg o png"),
