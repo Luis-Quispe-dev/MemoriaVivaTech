@@ -48,12 +48,12 @@ public class ActividadService {
     public ActividadRespondeDTO crearActividad(ActividadLlamadoDTO dto, CustomUserDetails usuarioLogueado) {
         Asignacion asignacion = asignacionRepository
                 .findById(dto.getIdAsignacion())
-                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada."));
 
         validarPertenenciaAsignacion(asignacion, usuarioLogueado.getId());
 
         if (!asignacion.getEstado().equals(Asignacion.Estado.ACTIVA)) {
-            throw new RuntimeException("No se pueden agregar actividades a una asignación finalizada");
+            throw new RuntimeException("No se pueden agregar actividades a una asignación finalizada.");
         }
 
         ActividadCalendario actividad = new ActividadCalendario();
@@ -81,7 +81,7 @@ public class ActividadService {
 
     public List<ActividadRespondeDTO> obtenerActividadesPorAsignacion(Long idAsignacion, Long idUsuarioLogueado) {
         Asignacion asignacion = asignacionRepository.findById(idAsignacion)
-                .orElseThrow(() -> new RuntimeException("Asignación no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Asignación no encontrada."));
 
         validarPertenenciaAsignacion(asignacion, idUsuarioLogueado);
 
