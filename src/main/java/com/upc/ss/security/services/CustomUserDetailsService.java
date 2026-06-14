@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Devuelve un UserDetails que Spring Security usará para:
  * - Verificar la contraseña al hacer login.
  * - Saber qué roles/authorities tiene para autorización (@PreAuthorize, .hasRole(), etc.).
- * ------------------
+ * ----------------------
  * Su propósito principal es cargar los detalles de un usuario a partir de un identificador,
  * que generalmente es el nombre de usuario (username).
  * Es usado por JwtRequestFilter
